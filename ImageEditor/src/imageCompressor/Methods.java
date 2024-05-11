@@ -1,16 +1,23 @@
 package imageCompressor;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.WindowConstants;
+
+
+
 
 public class Methods {
 
@@ -18,6 +25,18 @@ public class Methods {
 	private static JLabel picLabel;
 	private static String myPath; // default image
 	private static Color[][] pom;
+	private static int snapshotCnt; // keeps track of current snapshot for undo/redo
+	private static Color[][][] snapshots; // max 25 undo/redo's
+	private static int maxSnapshotCnt;
+	
+//	HashMap<Object, Action> actions; // used for undo/redo
+	
+//	AbstractDocument doc; // text cast to AbstractDocument, used for undo/redo
+//	static final int MAX_CHARACTERS = 300;
+//	static final int INFINITY = (int) 1e9+7;
+//	protected UndoAction undoAction = new UndoAction();
+//  protected RedoAction redoAction = new RedoAction();
+//  protected UndoManager undo = new UndoManager();
 	
 	public Methods(String myPath) {
 		Methods.myPath = myPath;
@@ -53,7 +72,7 @@ public class Methods {
 	
 	
 	/**
-	 * Checks whether given pair of coordinates in inside of buffered image bounds. 
+	 * Checks whether given pair of coordinates is inside of buffered image bounds. 
 	 * @param x row coordinate
 	 * @param y column coordinate
 	 * @return {@code True} if they are inside, {@code False} otherwise
@@ -66,21 +85,55 @@ public class Methods {
 	 * Fills {@code pom} with RGB values from image at {@code BI}.
 	 */
 	private static void updatePom() {
+		
 		final int width = BI.getWidth();
 	    final int height = BI.getHeight();
 		pom = new Color[width][height]; 
 	    for (int i = 0;i < width;i++) {
 	    	for (int j = 0;j < height;j++) {
 	    		try {
-					pom[i][j] = new Color(BI.getRGB(i, j));
+	    			Color curr = new Color(BI.getRGB(i, j)); 
+					pom[i][j] = curr;
+					snapshots[i][j][snapshotCnt] = curr;
 				} catch (Exception exc) {
 					exc.printStackTrace();
 				}
 	    	}
 	    }
+	    snapshotCnt++;
+//	    System.out.printf("snapshotCnt is %d\n", snapshotCnt);
 	}
 	
-	// TODO add undo
+
+	/**
+	 * Reverses the last action.
+	 */
+	public static void undo() {
+
+		if (snapshotCnt <= 0) return;
+//		System.out.println("in");
+		final int width = BI.getWidth();
+	    final int height = BI.getHeight();
+		pom = new Color[width][height]; 
+	    for (int i = 0;i < width;i++) {
+	    	for (int j = 0;j < height;j++) {
+	    		try {
+					pom[i][j] = snapshots[i][j][snapshotCnt - 1];
+					snapshots[i][j][snapshotCnt] = pom[i][j];
+					BI.setRGB(i, j, pom[i][j].getRGB());
+					
+				} catch (Exception exc) {
+					// skip if image is resized
+				}
+	    	}
+	    }
+	    if (snapshotCnt > maxSnapshotCnt) maxSnapshotCnt = snapshotCnt;
+	    snapshotCnt--;
+//		System.out.printf("undoing %d\n", snapshotCnt);
+	    picLabel.setIcon(new ImageIcon(BI));
+	}
+	
+	
 	
 	/**
 	 * Helper class for black neutral-density filter. <p> 
@@ -222,7 +275,7 @@ public class Methods {
 	 * This value is displayed as the intensity of blue at (x,y). <p>
 	 * This is a somewhat different, non-unique representation of the image's data.
 	 */
-	public static void plotImageData() {
+	public static void plotImageData() { // TODO fix error javax.imageio.IIOException: Can't read input file!
 		updatePom();
 		final int width = BI.getWidth();
 	    final int height = BI.getHeight();
@@ -426,7 +479,7 @@ public class Methods {
 	    			break;
 	    		}
 	    		
-	    	}System.out.println();
+	    	}
 	    }
 		
 	    picLabel.setIcon(new ImageIcon(BI));
@@ -497,7 +550,7 @@ public class Methods {
 	    			break;
 	    		}
 	    		
-	    	}System.out.println();
+	    	}
 	    }
 		
 	    picLabel.setIcon(new ImageIcon(BI));
@@ -538,7 +591,7 @@ public class Methods {
 	    			break;
 	    		}
 	    		
-	    	}System.out.println();
+	    	}
 	    }
 		
 	    picLabel.setIcon(new ImageIcon(BI));
@@ -584,7 +637,7 @@ public class Methods {
 	    			break;
 	    		}
 	    		
-	    	}System.out.println();
+	    	}
 	    }
 		
 	    picLabel.setIcon(new ImageIcon(BI));
@@ -624,7 +677,7 @@ public class Methods {
 	    			break;
 	    		}
 	    		
-	    	}System.out.println();
+	    	}
 	    }
 		
 	    picLabel.setIcon(new ImageIcon(BI));
@@ -657,7 +710,7 @@ public class Methods {
 	    			break;
 	    		}
 	    		
-	    	}System.out.println();
+	    	}
 	    }
 		picLabel.setIcon(new ImageIcon(BI));
 //		System.out.printf("%d %d\n", BI.getWidth(), BI.getHeight());
@@ -684,7 +737,9 @@ public class Methods {
 		try {
 			
 //			myPath = "data/miller.jpg";
-			return ImageIO.read(new File(myPath));
+			BufferedImage BI = ImageIO.read(new File(myPath));
+			snapshots = new Color[BI.getWidth()][BI.getHeight()][25]; // max 25 undo/redo's
+			return BI;
 			
 		} catch (Exception exc) {
 			System.out.println(exc);
