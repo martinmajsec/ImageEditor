@@ -6,6 +6,7 @@ import java.awt.Color; // sRGB color space
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.awt.image.*;
 import java.io.*;
 
@@ -33,7 +34,7 @@ public class ImageCompressor extends JFrame {
 	/**
 	 * default image
 	 */
-	final static String myPath = "img.jpg"; 
+	static String myPath = "empty.png"; 
 	
 	/**
 	 * Main menu.
@@ -54,7 +55,7 @@ public class ImageCompressor extends JFrame {
 	/**
 	 * Save image in PNG format. IMPORTANT: add extension when saving the image.
 	 */
-	private JMenu menu4 = new JMenu("Save");
+	private JMenu menu4 = new JMenu("File");
 	
 	// see a function foo's description at Methods.foo call
 	
@@ -78,18 +79,23 @@ public class ImageCompressor extends JFrame {
 	JMenuItem gndFilter = new JMenuItem("GND filter");
 		
 	JMenuItem saveItem = new JMenuItem("Save image");
-	JMenuItem undoItem = new JMenuItem("Undo"); // TODO
+	JMenuItem undoItem = new JMenuItem("Undo"); 
+	JMenuItem openItem = new JMenuItem("Open image"); // TODO
+//	JMenuItem redoItem = new JMenuItem("Redo"); // TODO
 	
-
+	
 	
 	public ImageCompressor() throws IOException {
 		super("Compress");
-		new Methods(myPath);
-		BI = Methods.loadImage(myPath);
+		FileOpen();
+		
+
+        BI = Methods.loadImage(myPath);
 		picLabel = new JLabel(new ImageIcon(BI));
 		Methods.setBI(BI);
 		Methods.setPicLabel(picLabel);
 		add(picLabel); // default image
+		
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		
@@ -121,6 +127,19 @@ public class ImageCompressor extends JFrame {
 		gndFilter.addActionListener(e -> gndFilterListener());
 
 		saveItem.addActionListener(e -> FileSave());
+		undoItem.addActionListener(e -> Methods.undo());
+		openItem.addActionListener(e -> resetFrame());
+//		redoItem.addActionListener(e -> Methods.redo()); // TODO
+	}
+
+	private void resetFrame() {
+		try {
+			setVisible(false);
+			dispose();
+			new ImageCompressor().setVisible(true);
+		} catch (IOException exc) {
+			exc.printStackTrace();
+		}
 	}
 
 	/**
@@ -134,10 +153,13 @@ public class ImageCompressor extends JFrame {
     	}
     	*/
 		JFileChooser fileChooser = new JFileChooser();
+		File dir = new File("data");
+		fileChooser.setCurrentDirectory(dir);
         int returnVal = fileChooser.showDialog(null, "Save");
         
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
+            System.out.println(file.toString());
             try {
 				ImageIO.write(BI, "png", file);
 //				System.out.println(file.getPath());
@@ -146,6 +168,30 @@ public class ImageCompressor extends JFrame {
 			}
         } 
     }
+	
+	/**
+	 * Opens image via JFileChooser.
+	 */
+	public void FileOpen() {
+    	/*
+		String writerNames[] = ImageIO.getWriterFormatNames();
+    	for (int i = 0;i < writerNames.length;i++) {
+    		System.out.println(writerNames[i]);
+    	}
+    	*/
+		JFileChooser fileChooser = new JFileChooser();
+		File dir = new File("data");
+		fileChooser.setCurrentDirectory(dir);
+        int returnVal = fileChooser.showDialog(null, "Open");
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            myPath = file.getName();  
+        } 
+  
+    }
+	
+	
 	/**
 	 * Parses input and applies GND filter.
 	 */
@@ -269,6 +315,7 @@ public class ImageCompressor extends JFrame {
 	        	  }
 	        	  if (which == "const") {
 	        		  System.out.println("const");
+//	        		  System.out.printf("%f %f %f %d\n", red, green, blue, factor);
 	        		  Methods.increaseRGBconstant(red, green, blue, factor);
 	        	  }
 	        	  else if (which == "cyclic") {
@@ -353,17 +400,27 @@ public class ImageCompressor extends JFrame {
 		menu3.add(sharpenHard);
 		menu3.add(sharpenSoft);
 		
+		menu4.add(saveItem);
+		menu4.add(undoItem);
+		menu4.add(openItem);
+//		menu4.add(redoItem);
+		
+		menuBar.add(menu4);
 		menuBar.add(menu2);
 		menuBar.add(menu3);
 		menuBar.add(menu1);
-		menuBar.add(menu4);
 		
-		menu4.add(saveItem);
+		
+		
 	
 		KeyStroke ctrlS = KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK);
 		saveItem.setAccelerator(ctrlS);
 		KeyStroke ctrlX = KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK);
 		invert.setAccelerator(ctrlX);
+		KeyStroke ctrlO = KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK);
+		openItem.setAccelerator(ctrlO);
+		KeyStroke ctrlZ = KeyStroke.getKeyStroke(KeyEvent.VK_Z, ActionEvent.CTRL_MASK);
+		undoItem.setAccelerator(ctrlZ);
 		
 		
 		setJMenuBar(menuBar);
