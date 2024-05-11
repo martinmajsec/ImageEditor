@@ -1,2 +1,3 @@
-Currently, the way to edit an arbitrary image file is to change myPath at [ImageCompressor.java](https://github.com/martinmajsec/ImageEditor/blob/main/ImageEditor/src/imageCompressor/ImageCompressor.java). Otherwise, the default image will be loaded. <p>
+Simple image editor with some filters and effects. When starting the program, you can select your own images, but some are also preloaded. Editing the image does not change the original image file. <p>
 Note: doesn't work with WebP images.
+
