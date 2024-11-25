@@ -64,6 +64,7 @@ public class ImageCompressor extends JFrame {
 	JMenuItem increaseRGBrandom = new JMenuItem("Random Increase");
 	JMenuItem increaseRGBcyclic = new JMenuItem("Cyclic Increase");
 	JMenuItem plotData = new JMenuItem("Plot data");
+	JMenuItem automaton = new JMenuItem("Automaton");
 	
 	JMenuItem increaseRGBconst = new JMenuItem("Constant Increase");
 	JMenuItem invert = new JMenuItem("Invert");
@@ -89,7 +90,6 @@ public class ImageCompressor extends JFrame {
 		super("Compress");
 		FileOpen();
 		
-
         BI = Methods.loadImage(myPath);
 		picLabel = new JLabel(new ImageIcon(BI));
 		Methods.setBI(BI);
@@ -117,6 +117,7 @@ public class ImageCompressor extends JFrame {
 		increaseRGBrandom.addActionListener(e -> randomIncreaseListener());
 		increaseRGBcyclic.addActionListener(e -> cyclicIncreaseListener());
 		plotData.addActionListener(e -> Methods.plotImageData());
+		automaton.addActionListener(e -> Methods.automaton());
 		
 		minFilter.addActionListener(e -> factorFilterActionListener("minimum"));
 		maxFilter.addActionListener(e -> factorFilterActionListener("maximum"));
@@ -186,7 +187,7 @@ public class ImageCompressor extends JFrame {
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
-            myPath = file.getName();  
+            myPath = file.getAbsolutePath();
         } 
   
     }
@@ -386,6 +387,7 @@ public class ImageCompressor extends JFrame {
 		menu1.add(increaseRGBcyclic);
 		menu1.add(round);
 		menu1.add(plotData);
+		menu1.add(automaton);
 		
 		menu2.add(minFilter);
 		menu2.add(maxFilter);
@@ -421,7 +423,8 @@ public class ImageCompressor extends JFrame {
 		openItem.setAccelerator(ctrlO);
 		KeyStroke ctrlZ = KeyStroke.getKeyStroke(KeyEvent.VK_Z, ActionEvent.CTRL_MASK);
 		undoItem.setAccelerator(ctrlZ);
-		
+		KeyStroke ctrlA = KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.CTRL_MASK);
+		automaton.setAccelerator(ctrlA);
 		
 		setJMenuBar(menuBar);
 		

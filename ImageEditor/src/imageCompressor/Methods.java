@@ -596,6 +596,97 @@ public class Methods {
 		
 	    picLabel.setIcon(new ImageIcon(BI));
 	}
+	
+	public static void automaton() {
+		updatePom();
+		final int width = BI.getWidth();
+	    final int height = BI.getHeight();
+	    System.out.printf("w:%d, h:%d\n", width, height);
+	    setBlack(0, height/2);
+	    
+	    for (int i = 1;i < width;i++) {
+	    	for (int j = 1;j < height - 1;j++) {
+	    		try {
+	    			if (isBlack(i-1,j-1) && isBlack(i-1,j) && isBlack(i-1,j+1)) {
+	    				setWhite(i,j);
+	    			}
+	    			if (isBlack(i-1,j-1) && isBlack(i-1,j) && !isBlack(i-1,j+1)) {
+	    				setBlack(i,j);
+	    			}
+	    			if (isBlack(i-1,j-1) && !isBlack(i-1,j) && isBlack(i-1,j+1)) {
+	    				setWhite(i,j);
+	    			}
+	    			if (isBlack(i-1,j-1) && !isBlack(i-1,j) && !isBlack(i-1,j+1)) {
+	    				setBlack(i,j);
+	    			}
+	    			if (!isBlack(i-1,j-1) && isBlack(i-1,j) && isBlack(i-1,j+1)) {
+	    				setBlack(i,j);
+	    			}
+	    			if (!isBlack(i-1,j-1) && isBlack(i-1,j) && !isBlack(i-1,j+1)) {
+	    				setWhite(i,j);
+	    			}
+	    			if (!isBlack(i-1,j-1) && !isBlack(i-1,j) && isBlack(i-1,j+1)) {
+	    				setBlack(i,j);
+	    			}
+	    			if (!isBlack(i-1,j-1) && !isBlack(i-1,j) && !isBlack(i-1,j+1)) {
+	    				setBlack(i,j);
+	    			}
+	    		}
+	    		catch (Exception exc) {
+	    			System.out.println(exc.toString());
+	    			break;
+	    		}
+	    		
+	    	}
+	    }
+		
+		
+		picLabel.setIcon(new ImageIcon(BI));
+	}
+	
+	private static void setBlack(int x, int y) {
+		try {
+			BI.setRGB(x, y, Color.black.getRGB());
+		}
+		catch (Exception exc) {
+			
+			System.out.println(exc.toString());
+			return;
+		}
+	}
+	private static void setWhite(int x, int y) {
+		try {
+			BI.setRGB(x, y, Color.white.getRGB());
+		}
+		catch (Exception exc) {
+			
+			System.out.println(exc.toString());
+			return;
+		}
+	}
+	
+	private static boolean isBlack(int x, int y) {
+		try {
+			Color mycolor = new Color(BI.getRGB(x, y));
+			return mycolor == Color.black;
+		}
+		catch (Exception exc) {
+			
+			System.out.println(exc.toString());
+			return true; // ignoriraj
+		}
+	}
+	private static boolean isWhite(int x, int y) {
+		try {
+			Color mycolor = new Color(BI.getRGB(x, y));
+			return mycolor == Color.white;
+		}
+		catch (Exception exc) {
+			System.out.println(exc.toString());
+			return true; // ignoriraj
+		}
+	}
+	
 	/**
 	 * Adds random noise to color specified by args.
 	 * @param r normalized R value ( to [0, 1.0] )
@@ -730,10 +821,10 @@ public class Methods {
 
 	/**
 	 * Loads image from file given by {@code pathToFile}.
-	 * @param pathToFile relative path to image file. The image must be in the data folder.
+	 * @param pathToFile absolute path to image file.
 	 */
 	static public BufferedImage loadImage(String pathToFile) {
-		String myPath = "data/" + pathToFile;
+		String myPath = pathToFile;
 		try {
 			
 //			myPath = "data/miller.jpg";
@@ -742,6 +833,7 @@ public class Methods {
 			return BI;
 			
 		} catch (Exception exc) {
+			System.out.println("LoadImage error...");
 			System.out.println(exc);
 		}
 		return null;
